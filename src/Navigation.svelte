@@ -12,7 +12,7 @@
 <nav class="flex justify-around items-center h-14 bg-zinc-900 border-t border-zinc-800">
   {#each tabs as tab}
     <button
-      class="flex flex-col items-center gap-1 px-4 py-2 transition-colors duration-200
+      class="flex-1 w-full flex flex-col items-center gap-1 px-4 py-2 transition-colors duration-200
              {activeTab === tab.id ? 'text-violet-500' : 'text-zinc-500 hover:text-zinc-300'}"
       onclick={() => activeTab = tab.id}
     >
