@@ -1,17 +1,16 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
+  import { slide, fly, fade } from 'svelte/transition';
+  import { flip } from 'svelte/animate';
 
-  let cities = $state([
-    { id: 1, name: 'New York', timezone: 'America/New_York' },
-    { id: 2, name: 'London', timezone: 'Europe/London' },
-    { id: 3, name: 'Tokyo', timezone: 'Asia/Tokyo' }
-  ]);
+  let cities = $state([]);
 
   let currentTime = $state(new Date());
   let showAddForm = $state(false);
   let newCityName = $state('');
   let newCityTimezone = $state('');
   let intervalId = null;
+  let isMounted = $state(false);
 
   // Common timezones for dropdown
   const timezones = [
@@ -57,35 +56,69 @@
   });
 
   async function loadCities() {
+    // Default cities (same as previous hardcoded state)
+    const defaults = [
+      { id: 1, name: 'New York', timezone: 'America/New_York' },
+      { id: 2, name: 'London', timezone: 'Europe/London' },
+      { id: 3, name: 'Tokyo', timezone: 'Asia/Tokyo' }
+    ];
+
     if (typeof browser !== 'undefined') {
       try {
         const result = await browser.storage.local.get('worldClockCities');
         if (result.worldClockCities) {
           cities = result.worldClockCities;
+        } else {
+          // No saved data, use defaults
+          cities = defaults;
         }
       } catch (e) {
         console.error('Failed to load cities:', e);
+        cities = defaults;
       }
+    } else {
+      // Fallback for non-extension environment
+      cities = defaults;
     }
+    
+    // Enable animations only AFTER initial data is loaded
+    // Use a small timeout to ensure the DOM has updated with the initial list
+    setTimeout(() => {
+      isMounted = true;
+    }, 100);
   }
 
   async function saveCities() {
     if (typeof browser !== 'undefined') {
       try {
-        await browser.storage.local.set({ worldClockCities: cities });
+        // Deep copy to remove Svelte proxies
+        const citiesToSave = JSON.parse(JSON.stringify(cities));
+        await browser.storage.local.set({ worldClockCities: citiesToSave });
       } catch (e) {
         console.error('Failed to save cities:', e);
       }
     }
   }
 
-  function getTimeForTimezone(timezone) {
-    return currentTime.toLocaleTimeString('en-US', {
+  function getTimeParts(timezone) {
+    const formatter = new Intl.DateTimeFormat('en-US', {
       timeZone: timezone,
       hour: '2-digit',
       minute: '2-digit',
+      second: '2-digit',
       hour12: true
     });
+    
+    // We can rely on predictable format for en-US: "10:30:45 AM"
+    const timeString = formatter.format(currentTime);
+    const [timeWithSeconds, ampm] = timeString.split(' ');
+    const [hours, minutes, seconds] = timeWithSeconds.split(':');
+    
+    return {
+      main: `${hours}:${minutes}`,
+      sub: seconds,
+      ampm: ampm
+    };
   }
 
   function getDateForTimezone(timezone) {
@@ -128,95 +161,64 @@
     cities = cities.filter(c => c.id !== city.id);
     saveCities();
   }
+
+  function startupSlide(node, params) {
+    if (!isMounted) return { duration: 0 };
+    return slide(node, params);
+  }
 </script>
 
-<div class="flex flex-col h-full p-4">
-  <h2 class="text-lg font-medium text-white mb-4">World Clock</h2>
+<div class="h-full p-4 grid grid-cols-1 grid-rows-1 overflow-hidden relative">
+  <!-- City List (Always Rendered) -->
+  <div class="flex flex-col h-full col-start-1 row-start-1">
+    <h2 class="text-lg font-medium text-white mb-4">World Clock</h2>
 
-  <!-- City List -->
-  <div class="flex-1 overflow-y-auto custom-scrollbar">
-    {#if cities.length === 0}
-      <div class="flex items-center justify-center h-32 text-zinc-500">
-        No cities added
-      </div>
-    {:else}
-      {#each cities as city}
-        <div class="flex items-center justify-between py-4 border-b border-zinc-800">
-          <div class="flex-1">
-            <div class="flex items-center gap-2 mb-1">
-              <span class="text-sm text-zinc-400">{city.name}</span>
-              <span class="text-xs text-zinc-600 px-2 py-0.5 bg-zinc-800 rounded">
-                {getTimeDiff(city.timezone)}
-              </span>
-            </div>
-            <div class="text-4xl font-light text-white font-mono">
-              {getTimeForTimezone(city.timezone)}
-            </div>
-            <div class="text-xs text-zinc-500 mt-1">
-              {getDateForTimezone(city.timezone)}
-            </div>
-          </div>
-
-          <button
-            class="p-2 text-zinc-500 hover:text-red-400 transition-colors duration-200"
-            onclick={() => removeCity(city)}
-            aria-label="Remove {city.name}"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+    <!-- City List -->
+    <div class="flex-1 overflow-y-auto custom-scrollbar">
+      {#if cities.length === 0}
+        <div class="flex items-center justify-center h-32 text-zinc-500">
+          No cities added
         </div>
-      {/each}
-    {/if}
-  </div>
+      {:else}
+        {#each cities as city (city.id)}
+          <div 
+            class="flex items-center justify-between py-4 border-b border-zinc-800"
+            transition:startupSlide|local={{ duration: 200, axis: 'y' }}
+            animate:flip={{ duration: 300 }}
+          >
+            <div class="flex-1">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="text-sm text-zinc-400">{city.name}</span>
+                <span class="text-xs text-zinc-600 px-2 py-0.5 bg-zinc-800 rounded">
+                  {getTimeDiff(city.timezone)}
+                </span>
+              </div>
+              <div class="text-white font-mono flex gap-1.5 h-10">
+                <span class="text-4xl font-light leading-none flex items-center">{getTimeParts(city.timezone).main}</span>
+                <div class="flex flex-col justify-between text-xs text-zinc-400 font-medium leading-none py-0.5">
+                  <span>{getTimeParts(city.timezone).ampm}</span>
+                  <span class="text-zinc-300 font-bold text-sm tracking-wide">{getTimeParts(city.timezone).sub}</span>
+                </div>
+              </div>
+              <div class="text-xs text-zinc-500 mt-1">
+                {getDateForTimezone(city.timezone)}
+              </div>
+            </div>
 
-  <!-- Add City Form -->
-  {#if showAddForm}
-    <div class="mt-4 p-4 bg-zinc-900 rounded-xl">
-      <div class="mb-4">
-        <label for="city-name" class="block text-xs text-zinc-500 uppercase tracking-wider mb-2">City Name</label>
-        <input
-          id="city-name"
-          type="text"
-          bind:value={newCityName}
-          placeholder="e.g., Paris"
-          class="w-full bg-zinc-800 text-white p-3 rounded-lg border border-zinc-700 focus:border-violet-500 focus:outline-none"
-        />
-      </div>
-
-      <div class="mb-4">
-        <label for="city-timezone" class="block text-xs text-zinc-500 uppercase tracking-wider mb-2">Timezone</label>
-        <select
-          id="city-timezone"
-          bind:value={newCityTimezone}
-          class="w-full bg-zinc-800 text-white p-3 rounded-lg border border-zinc-700 focus:border-violet-500 focus:outline-none"
-        >
-          <option value="">Select timezone</option>
-          {#each timezones as tz}
-            <option value={tz.value}>{tz.label}</option>
-          {/each}
-        </select>
-      </div>
-
-      <div class="flex gap-3">
-        <button
-          class="flex-1 py-2.5 bg-zinc-700 hover:bg-zinc-600 rounded-full text-white font-medium transition-colors duration-200"
-          onclick={() => showAddForm = false}
-        >
-          Cancel
-        </button>
-        <button
-          class="flex-1 py-2.5 bg-violet-600 hover:bg-violet-700 rounded-full text-white font-medium transition-colors duration-200
-                 {!newCityName || !newCityTimezone ? 'opacity-50 cursor-not-allowed' : ''}"
-          onclick={addCity}
-          disabled={!newCityName || !newCityTimezone}
-        >
-          Add
-        </button>
-      </div>
+            <button
+              class="p-2 text-zinc-500 hover:text-red-400 transition-colors duration-200"
+              onclick={() => removeCity(city)}
+              aria-label="Remove {city.name}"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        {/each}
+      {/if}
     </div>
-  {:else}
+
     <!-- Add City Button -->
     <button
       class="mt-4 py-3 bg-violet-600 hover:bg-violet-700 rounded-full text-white font-medium transition-colors duration-200 flex items-center justify-center gap-2"
@@ -227,5 +229,60 @@
       </svg>
       Add City
     </button>
+  </div>
+
+  <!-- Add City Form (Overlay) -->
+  {#if showAddForm}
+    <div 
+      class="flex flex-col h-full bg-zinc-950 col-start-1 row-start-1 z-10"
+      in:fly|local={{ y: 20, duration: 300, delay: 150 }}
+      out:fade|local={{ duration: 150 }}
+    >
+      <h2 class="text-lg font-medium text-white mb-4">Add City</h2>
+      
+      <div class="flex-1">
+        <div class="mb-4">
+          <label for="city-name" class="block text-xs text-zinc-500 uppercase tracking-wider mb-2">City Name</label>
+          <input
+            id="city-name"
+            type="text"
+            bind:value={newCityName}
+            placeholder="e.g., Paris"
+            class="w-full bg-zinc-800 text-white p-3 rounded-lg border border-zinc-700 focus:border-violet-500 focus:outline-none"
+          />
+        </div>
+
+        <div class="mb-4">
+          <label for="city-timezone" class="block text-xs text-zinc-500 uppercase tracking-wider mb-2">Timezone</label>
+          <select
+            id="city-timezone"
+            bind:value={newCityTimezone}
+            class="w-full bg-zinc-800 text-white p-3 rounded-lg border border-zinc-700 focus:border-violet-500 focus:outline-none"
+          >
+            <option value="">Select timezone</option>
+            {#each timezones as tz}
+              <option value={tz.value}>{tz.label}</option>
+            {/each}
+          </select>
+        </div>
+      </div>
+
+      <div class="flex gap-3 mt-auto">
+        <button
+          class="flex-1 py-3 bg-zinc-700 hover:bg-zinc-600 rounded-full text-white font-medium transition-colors duration-200"
+          onclick={() => showAddForm = false}
+        >
+          Cancel
+        </button>
+        <button
+          class="flex-1 py-3 bg-violet-600 hover:bg-violet-700 rounded-full text-white font-medium transition-colors duration-200
+                 {!newCityName || !newCityTimezone ? 'opacity-50 cursor-not-allowed' : ''}"
+          onclick={addCity}
+          disabled={!newCityName || !newCityTimezone}
+        >
+          Add
+        </button>
+      </div>
+    </div>
   {/if}
 </div>
