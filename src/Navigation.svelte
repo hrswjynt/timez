@@ -3,7 +3,7 @@
 
   const tabs = [
     { id: 'alarm', label: 'Alarm' },
-    { id: 'worldclock', label: 'Clock' },
+    { id: 'worldclock', label: 'World Clock' },
     { id: 'stopwatch', label: 'Stopwatch' },
     { id: 'timer', label: 'Timer' }
   ];
@@ -37,7 +37,7 @@
                 d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0zM9 3h6M12 3v3" />
         </svg>
       {/if}
-      <span class="text-xs font-medium">{tab.label}</span>
+      <span class="text-xs font-medium whitespace-nowrap">{tab.label}</span>
     </button>
   {/each}
 </nav>

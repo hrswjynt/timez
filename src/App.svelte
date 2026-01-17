@@ -6,12 +6,15 @@
   import Alarm from './Alarm.svelte';
   import WorldClock from './WorldClock.svelte';
   import Navigation from './Navigation.svelte';
+  import { uiState } from './uiState.svelte.js';
 
   let activeTab = $state('timer');
   let isAppMounted = $state(false);
 
   // Load saved tab and listen for messages from background script
   onMount(() => {
+    uiState.isOverlayOpen = false; // Ensure overlays are closed on reopen
+
     if (typeof browser !== 'undefined') {
       // Load last active tab
       browser.storage.local.get('activeTab').then((result) => {
@@ -67,5 +70,7 @@
     {/key}
   </main>
 
-  <Navigation bind:activeTab />
+  {#if !uiState.isOverlayOpen}
+    <Navigation bind:activeTab />
+  {/if}
 </div>

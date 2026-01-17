@@ -210,20 +210,20 @@
   <div class="flex justify-center gap-4 mb-3">
     {#if isRunning}
       <button
-        class="px-8 py-3 bg-zinc-700 hover:bg-zinc-600 rounded-full text-white font-medium transition-colors duration-200"
+        class="px-6 py-2 bg-zinc-700 hover:bg-zinc-600 rounded-full text-white font-medium transition-colors duration-200 flex items-center justify-center"
         onclick={lap}
       >
         Lap
       </button>
       <button
-        class="px-8 py-3 bg-red-600 hover:bg-red-700 rounded-full text-white font-medium transition-colors duration-200"
+        class="px-6 py-2 bg-red-600 hover:bg-red-700 rounded-full text-white font-medium transition-colors duration-200 flex items-center justify-center"
         onclick={stop}
       >
         Stop
       </button>
     {:else}
       <button
-        class="px-8 py-3 bg-zinc-700 hover:bg-zinc-600 rounded-full text-white font-medium transition-colors duration-200
+        class="px-6 py-2 bg-zinc-700 hover:bg-zinc-600 rounded-full text-white font-medium transition-colors duration-200 flex items-center justify-center
                {elapsedMs === 0 ? 'opacity-50 cursor-not-allowed' : ''}"
         onclick={reset}
         disabled={elapsedMs === 0}
@@ -231,7 +231,7 @@
         Reset
       </button>
       <button
-        class="px-8 py-3 bg-green-600 hover:bg-green-700 rounded-full text-white font-medium transition-colors duration-200"
+        class="px-6 py-2 bg-green-600 hover:bg-green-700 rounded-full text-white font-medium transition-colors duration-200 flex items-center justify-center"
         onclick={start}
       >
         {elapsedMs > 0 ? 'Resume' : 'Start'}

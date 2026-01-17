@@ -2,6 +2,7 @@
   import { onMount, onDestroy } from 'svelte';
   import { slide, fly, fade } from 'svelte/transition';
   import { flip } from 'svelte/animate';
+  import { uiState } from './uiState.svelte.js';
 
   let cities = $state([]);
 
@@ -153,6 +154,7 @@
 
     saveCities();
     showAddForm = false;
+    uiState.isOverlayOpen = false;
     newCityName = '';
     newCityTimezone = '';
   }
@@ -166,14 +168,31 @@
     if (!isMounted) return { duration: 0 };
     return slide(node, params);
   }
+
+  function openAddForm() {
+    showAddForm = true;
+    uiState.isOverlayOpen = true;
+  }
 </script>
 
 <div class="h-full p-4 grid grid-cols-1 grid-rows-1 overflow-hidden relative">
-  <!-- City List (Always Rendered) -->
+  <!-- Cities List (Always Rendered) -->
   <div class="flex flex-col h-full col-start-1 row-start-1">
-    <h2 class="text-lg font-medium text-white mb-4">World Clock</h2>
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-xl font-bold text-white tracking-tight">World Clock</h2>
+      <!-- Add City Icon Button -->
+      <button
+        class="p-2 rounded-full hover:bg-zinc-800 text-violet-400 transition-colors"
+        onclick={openAddForm}
+        aria-label="Add city"
+      >
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+      </button>
+    </div>
 
-    <!-- City List -->
+    <!-- List -->
     <div class="flex-1 overflow-y-auto custom-scrollbar">
       {#if cities.length === 0}
         <div class="flex items-center justify-center h-32 text-zinc-500">
@@ -218,17 +237,6 @@
         {/each}
       {/if}
     </div>
-
-    <!-- Add City Button -->
-    <button
-      class="mt-4 py-3 bg-violet-600 hover:bg-violet-700 rounded-full text-white font-medium transition-colors duration-200 flex items-center justify-center gap-2"
-      onclick={() => showAddForm = true}
-    >
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-      </svg>
-      Add City
-    </button>
   </div>
 
   <!-- Add City Form (Overlay) -->
@@ -269,13 +277,16 @@
 
       <div class="flex gap-3 mt-auto">
         <button
-          class="flex-1 py-3 bg-zinc-700 hover:bg-zinc-600 rounded-full text-white font-medium transition-colors duration-200"
-          onclick={() => showAddForm = false}
+          class="flex-1 py-2 bg-zinc-700 hover:bg-zinc-600 rounded-full text-white font-medium transition-colors duration-200 flex items-center justify-center"
+          onclick={() => {
+            showAddForm = false;
+            uiState.isOverlayOpen = false;
+          }}
         >
           Cancel
         </button>
         <button
-          class="flex-1 py-3 bg-violet-600 hover:bg-violet-700 rounded-full text-white font-medium transition-colors duration-200
+          class="flex-1 py-2 bg-violet-600 hover:bg-violet-700 rounded-full text-white font-medium transition-colors duration-200 flex items-center justify-center
                  {!newCityName || !newCityTimezone ? 'opacity-50 cursor-not-allowed' : ''}"
           onclick={addCity}
           disabled={!newCityName || !newCityTimezone}

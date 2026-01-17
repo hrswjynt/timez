@@ -269,21 +269,21 @@
     <div class="flex gap-3 mb-4">
       {#if isRunning}
         <button
-          class="px-8 py-3 bg-red-600 hover:bg-red-700 rounded-full text-white font-medium transition-colors duration-200"
+          class="px-6 py-2 bg-red-600 hover:bg-red-700 rounded-full text-white font-medium transition-colors duration-200"
           onclick={stop}
         >
           Pause
         </button>
       {:else}
         <button
-          class="px-6 py-3 bg-zinc-700 hover:bg-zinc-600 rounded-full text-white font-medium transition-colors duration-200"
+          class="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 rounded-full text-white font-medium transition-colors duration-200"
           onclick={reset}
         >
           Reset
         </button>
         {#if !isFinished}
           <button
-            class="px-6 py-3 bg-violet-600 hover:bg-violet-700 rounded-full text-white font-medium transition-colors duration-200"
+            class="px-4 py-2 bg-violet-600 hover:bg-violet-700 rounded-full text-white font-medium transition-colors duration-200"
             onclick={resume}
           >
             Resume
