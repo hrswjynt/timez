@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Timez",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A minimal clock extension with alarm, stopwatch, timer, and world clock",
   "permissions": [
     "alarms",
@@ -30,14 +30,14 @@
   "browser_specific_settings": {
     "gecko": {
       "id": "timez@extension.local",
-      "strict_min_version": "112.0",
+      "strict_min_version": "115.0",
       "data_collection_permissions": {
         "required": [],
         "optional": []
       }
     },
     "gecko_android": {
-        "strict_min_version": "112.0"
+        "strict_min_version": "115.0"
     }
   }
 }
