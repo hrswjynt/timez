@@ -26,6 +26,9 @@ browser.alarms.onAlarm.addListener((alarm) => {
 
         // Reschedule alarm for next day if it's a recurring alarm
         rescheduleAlarm(alarmData);
+      } else {
+        // Fallback if alarm data found (e.g. storage issue)
+        showNotification(title, 'Alarm');
       }
     });
     return; // Exit early, notification will be shown after getting alarm data
