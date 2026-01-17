@@ -5,10 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && npm run copy:extension",
+    "build": "vite build && npm run copy:extension && npm run zip",
     "build:extension": "vite build && npm run copy:extension",
     "copy:extension": "node scripts/copy-extension.js",
-    "zip": "powershell -Command \"Compress-Archive -Path dist/* -DestinationPath timez-extension.zip -Force\"",
+    "zip": "powershell -Command \"Remove-Item -Path timez-extension.zip -ErrorAction SilentlyContinue; Compress-Archive -Path dist/* -DestinationPath timez-extension.zip\"",
     "preview": "vite preview"
   },
   "devDependencies": {

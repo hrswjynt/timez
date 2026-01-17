@@ -99,13 +99,16 @@
   }
 
   async function lap() {
+    // Update elapsedMs to exact current time for better precision
+    elapsedMs = Date.now() - startTimestamp;
+    
     const lapTime = elapsedMs;
     const previousLapTime = laps.length > 0 ? laps[0].time : 0;
     const diff = lapTime - previousLapTime;
 
     // Determine color based on lap performance
     let color = 'white';
-    if (laps.length >= 2) {
+    if (laps.length >= 1) {
       const avgDiff = laps.reduce((sum, l) => sum + l.diff, 0) / laps.length;
       if (diff < avgDiff * 0.95) color = 'blue';
       else if (diff > avgDiff * 1.05) color = 'red';

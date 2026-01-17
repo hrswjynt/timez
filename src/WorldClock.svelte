@@ -144,11 +144,15 @@
   }
 
   function addCity() {
-    if (!newCityName || !newCityTimezone) return;
+    if (!newCityTimezone) return;
+
+    // Derive name from timezone label
+    const tz = timezones.find(t => t.value === newCityTimezone);
+    const name = tz ? tz.label.split(' (')[0] : newCityTimezone.split('/').pop().replace(/_/g, ' ');
 
     cities = [...cities, {
       id: Date.now(),
-      name: newCityName,
+      name: name,
       timezone: newCityTimezone
     }];
 
@@ -248,17 +252,8 @@
     >
       <h2 class="text-lg font-medium text-white mb-4">Add City</h2>
       
-      <div class="flex-1">
-        <div class="mb-4">
-          <label for="city-name" class="block text-xs text-zinc-500 uppercase tracking-wider mb-2">City Name</label>
-          <input
-            id="city-name"
-            type="text"
-            bind:value={newCityName}
-            placeholder="e.g., Paris"
-            class="w-full bg-zinc-800 text-white p-3 rounded-lg border border-zinc-700 focus:border-violet-500 focus:outline-none"
-          />
-        </div>
+      <div class="flex-1 flex flex-col justify-center">
+        <!-- Removed Name Input -->
 
         <div class="mb-4">
           <label for="city-timezone" class="block text-xs text-zinc-500 uppercase tracking-wider mb-2">Timezone</label>
@@ -287,9 +282,9 @@
         </button>
         <button
           class="flex-1 py-2 bg-violet-600 hover:bg-violet-700 rounded-full text-white font-medium transition-colors duration-200 flex items-center justify-center
-                 {!newCityName || !newCityTimezone ? 'opacity-50 cursor-not-allowed' : ''}"
+                 {!newCityTimezone ? 'opacity-50 cursor-not-allowed' : ''}"
           onclick={addCity}
-          disabled={!newCityName || !newCityTimezone}
+          disabled={!newCityTimezone}
         >
           Add
         </button>
