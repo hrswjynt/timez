@@ -1,5 +1,6 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
+  import { fade, fly } from 'svelte/transition';
 
   let isRunning = $state(false);
   let elapsedMs = $state(0);
@@ -153,44 +154,57 @@
 
 <div class="flex flex-col h-full p-4">
   <!-- Time Display -->
-  <div class="flex flex-col items-center py-4">
+  <!-- Spacer Top -->
+  <div class="min-h-0 transition-all duration-500 ease-spring
+              {laps.length === 0 ? 'grow' : 'grow-0 h-0'}"></div>
+
+  <!-- Time Display -->
+  <div class="flex-none flex flex-col items-center py-4 z-10">
     <div class="text-6xl font-light text-white tracking-wider font-mono">
       {formatTime(elapsedMs)}
     </div>
     {#if laps.length > 0}
-      <div class="text-xl text-zinc-400 font-mono mt-2">
+      <div 
+        class="text-xl text-zinc-400 font-mono mt-2"
+        in:fly={{ y: 10, duration: 400, delay: 150 }}
+        out:fade={{ duration: 200 }}
+      >
         +{formatLapTime(currentLapTime())}
       </div>
     {/if}
   </div>
 
   <!-- Lap History -->
-  {#if laps.length > 0}
-    <div class="flex-1 overflow-hidden mb-3">
-      <!-- Table Header -->
-      <div class="grid grid-cols-3 gap-4 px-2 pb-2 border-b border-zinc-800">
-        <span class="text-xs text-zinc-500 uppercase tracking-wider">Lap</span>
-        <span class="text-xs text-zinc-500 uppercase tracking-wider text-center">Lap times</span>
-        <span class="text-xs text-zinc-500 uppercase tracking-wider text-right">Overall time</span>
-      </div>
+  <div class="grow overflow-hidden mb-3 flex flex-col relative">
+    {#if laps.length > 0}
+      <div 
+        class="flex-1 flex flex-col absolute inset-0"
+        in:fly={{ y: 20, duration: 500, delay: 200 }}
+        out:fade={{ duration: 200 }}
+      >
+        <!-- Table Header -->
+        <div class="grid grid-cols-3 gap-4 px-2 pb-2 border-b border-zinc-800 flex-none">
+          <span class="text-xs text-zinc-500 uppercase tracking-wider">Lap</span>
+          <span class="text-xs text-zinc-500 uppercase tracking-wider text-center">Lap times</span>
+          <span class="text-xs text-zinc-500 uppercase tracking-wider text-right">Overall time</span>
+        </div>
 
-      <!-- Lap Rows -->
-      <div class="overflow-y-auto h-[calc(100%-28px)] custom-scrollbar">
-        {#each laps as lap, i}
-          <div
-            class="grid grid-cols-3 gap-4 px-2 py-2 border-b border-zinc-800/50
-                   {lap.color === 'red' ? 'text-red-400' : lap.color === 'blue' ? 'text-blue-400' : 'text-white'}"
-          >
-            <span class="font-mono text-sm">{String(laps.length - i).padStart(2, '0')}</span>
-            <span class="font-mono text-sm text-center">{formatLapTime(lap.diff)}</span>
-            <span class="font-mono text-sm text-right">{formatTime(lap.time)}</span>
-          </div>
-        {/each}
+        <!-- Lap Rows -->
+        <div class="overflow-y-auto min-h-0 custom-scrollbar flex-1">
+          {#each laps as lap, i}
+            <div
+              class="grid grid-cols-3 gap-4 px-2 py-2 border-b border-zinc-800/50
+                     {lap.color === 'red' ? 'text-red-400' : lap.color === 'blue' ? 'text-blue-400' : 'text-white'}"
+            >
+              <span class="font-mono text-sm">{String(laps.length - i).padStart(2, '0')}</span>
+              <span class="font-mono text-sm text-center">{formatLapTime(lap.diff)}</span>
+              <span class="font-mono text-sm text-right">{formatTime(lap.time)}</span>
+            </div>
+          {/each}
+        </div>
       </div>
-    </div>
-  {:else}
-    <div class="flex-1"></div>
-  {/if}
+    {/if}
+  </div>
 
   <!-- Controls -->
   <div class="flex justify-center gap-4 mb-3">
