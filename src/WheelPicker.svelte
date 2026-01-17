@@ -37,7 +37,7 @@
     }
   }
 
-  // Handle wheel events for precise control
+  // Handle wheel events for precise control (1 step at a time)
   function handleWheel(e) {
     e.preventDefault();
 
@@ -57,38 +57,18 @@
     }
   }
 
-  // Handle touch events for swipe
-  let touchStartY = 0;
-  let touchStartValue = 0;
+  // Handle scroll to update value
+  function handleScroll() {
+    if (!containerRef || isAnimating) return;
 
-  function handleTouchStart(e) {
-    touchStartY = e.touches[0].clientY;
-    touchStartValue = value;
-  }
-
-  function handleTouchMove(e) {
-    e.preventDefault();
-
-    const touchY = e.touches[0].clientY;
-    const deltaY = touchStartY - touchY;
-    const itemsToMove = Math.round(deltaY / (ITEM_HEIGHT / 2));
-
-    const startIndex = items.indexOf(touchStartValue);
-    const newIndex = Math.max(0, Math.min(items.length - 1, startIndex + itemsToMove));
+    const scrollTop = containerRef.scrollTop;
+    const index = Math.round(scrollTop / ITEM_HEIGHT);
+    const newIndex = Math.max(0, Math.min(items.length - 1, index));
     const newValue = items[newIndex];
 
     if (newValue !== value) {
       value = newValue;
-      // Update scroll position without smooth animation during drag
-      if (containerRef) {
-        containerRef.scrollTop = newIndex * ITEM_HEIGHT;
-      }
     }
-  }
-
-  function handleTouchEnd() {
-    // Ensure final snap
-    scrollToValue(value);
   }
 
   // Handle click on item to select it
@@ -138,11 +118,9 @@
     <!-- Scrollable container -->
     <div
       bind:this={containerRef}
-      class="h-full overflow-y-scroll scrollbar-hide"
+      class="h-full overflow-y-scroll scrollbar-hide snap-y snap-mandatory scroll-smooth"
+      onscroll={handleScroll}
       onwheel={handleWheel}
-      ontouchstart={handleTouchStart}
-      ontouchmove={handleTouchMove}
-      ontouchend={handleTouchEnd}
     >
       <!-- Top padding for centering first item -->
       <div style="height: {ITEM_HEIGHT * 2}px"></div>
@@ -150,7 +128,7 @@
       {#each items as item}
         <button
           type="button"
-          class="w-full h-12 flex items-center justify-center font-mono transition-all duration-150 cursor-pointer"
+          class="w-full h-12 flex items-center justify-center font-mono transition-all duration-150 cursor-pointer snap-center"
           class:text-white={item === value}
           class:text-6xl={item === value}
           class:font-light={item === value}
