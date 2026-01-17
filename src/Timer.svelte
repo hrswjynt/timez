@@ -6,6 +6,7 @@
   let minutes = $state(0);
   let seconds = $state(0);
   let isRunning = $state(false);
+  let isFinished = $state(false);
   let remainingMs = $state(0);
   let endTime = $state(0); // Timestamp when timer should end
   let intervalId = null;
@@ -48,8 +49,11 @@
             isRunning = true;
             startCountdown();
           } else {
-            // Timer already finished while popup was closed
-            await clearTimerState();
+            // Timer finished while popup was closed
+            isFinished = true;
+            remainingMs = 0;
+            // Clear storage so we don't reload this next time if they don't reset
+            await clearTimerState(); 
           }
         } else if (!wasRunning && savedRemainingMs > 0) {
           // Paused state - restore remaining time
@@ -100,6 +104,7 @@
 
       if (remainingMs <= 0) {
         stop();
+        isFinished = true;
         playSound();
       }
     }, 100);
@@ -112,6 +117,7 @@
     endTime = Date.now() + totalMs;
     remainingMs = totalMs;
     isRunning = true;
+    isFinished = false;
 
     // Save state to storage
     await saveTimerState();
@@ -151,6 +157,7 @@
 
     endTime = Date.now() + remainingMs;
     isRunning = true;
+    isFinished = false;
 
     await saveTimerState();
 
@@ -169,6 +176,7 @@
     await stop();
     remainingMs = 0;
     endTime = 0;
+    isFinished = false;
     hours = 0;
     minutes = 0;
     seconds = 0;
@@ -219,8 +227,8 @@
 </script>
 
 <div class="flex flex-col items-center justify-between h-full p-4 pt-6">
-  {#if isRunning || remainingMs > 0}
-    <!-- Running/Paused Timer Display -->
+  {#if isRunning || remainingMs > 0 || isFinished}
+    <!-- Running/Paused/Finished Timer Display -->
     <div class="flex-1 flex flex-col items-center justify-center">
       <div class="text-6xl font-light text-white tracking-wider font-mono">
         {displayTime()}
@@ -243,12 +251,14 @@
         >
           Reset
         </button>
-        <button
-          class="px-6 py-3 bg-violet-600 hover:bg-violet-700 rounded-full text-white font-medium transition-colors duration-200"
-          onclick={resume}
-        >
-          Resume
-        </button>
+        {#if !isFinished}
+          <button
+            class="px-6 py-3 bg-violet-600 hover:bg-violet-700 rounded-full text-white font-medium transition-colors duration-200"
+            onclick={resume}
+          >
+            Resume
+          </button>
+        {/if}
       {/if}
     </div>
   {:else}

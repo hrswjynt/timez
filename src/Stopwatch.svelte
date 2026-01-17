@@ -49,13 +49,16 @@
     if (typeof browser === 'undefined') return;
 
     try {
+      // Create a clean object without proxies for storage
+      const stateToSave = {
+        savedAt: Date.now(),
+        elapsedMs: elapsedMs,
+        laps: JSON.parse(JSON.stringify(laps)), // Deep copy to remove proxies
+        isRunning: isRunning
+      };
+
       await browser.storage.local.set({
-        stopwatchState: {
-          savedAt: Date.now(),
-          elapsedMs: elapsedMs,
-          laps: laps,
-          isRunning: isRunning
-        }
+        stopwatchState: stateToSave
       });
     } catch (e) {
       console.error('Failed to save stopwatch state:', e);
@@ -139,6 +142,9 @@
 
   // Cleanup on destroy
   onDestroy(() => {
+    // Save state when component is destroyed (tab switch or popup close)
+    saveStopwatchState();
+    
     if (intervalId) {
       clearInterval(intervalId);
     }
