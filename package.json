@@ -8,6 +8,7 @@
     "build": "vite build && npm run copy:extension",
     "build:extension": "vite build && npm run copy:extension",
     "copy:extension": "node scripts/copy-extension.js",
+    "zip": "powershell -Command \"Compress-Archive -Path dist/* -DestinationPath timez-extension.zip -Force\"",
     "preview": "vite preview"
   },
   "devDependencies": {

@@ -18,23 +18,28 @@
     >
       {#if tab.id === 'alarm'}
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z M19 4l-2 2 M5 4l2 2" />
+          <!-- Waker/Alarm Clock: Circle with hands + "ears"/bells -->
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 22a9 9 0 1 1 0-18 9 9 0 0 1 0 18ZM19 4L17 6M5 4L7 6M12 8V12L15 15" />
         </svg>
       {:else if tab.id === 'worldclock'}
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <!-- Globe/World: Circle with meridians/parallels -->
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm0 0c2.5 0 5 4.48 5 10s-2.5 10-5 10-5-4.48-5-10 2.5-10 5-10ZM2 12h20" />
         </svg>
       {:else if tab.id === 'stopwatch'}
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <!-- Mechanical Stopwatch: Circle with top button -->
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                d="M12 6a9 9 0 1 0 9 9 9 9 0 0 0-9-9Zm0-4v4m-4-2h8m-4 6v5" />
         </svg>
       {:else if tab.id === 'timer'}
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0zM9 3h6M12 3v3" />
+          <!-- Hourglass -->
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                d="M7 2v4l5 5-5 5v4h10v-4l-5-5 5-5V2H7Z" />
         </svg>
       {/if}
       <span class="text-xs font-medium whitespace-nowrap">{tab.label}</span>

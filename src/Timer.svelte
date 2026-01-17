@@ -306,10 +306,10 @@
     </div>
 
     <!-- Presets -->
-    <div class="flex gap-2 mb-3">
+    <div class="flex gap-2 mb-3 w-full max-w-xs">
       {#each presets as preset}
         <button
-          class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-full text-sm text-zinc-300 font-mono transition-colors duration-200"
+          class="flex-1 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-full text-sm text-zinc-300 font-mono transition-colors duration-200 flex items-center justify-center"
           onclick={() => setPreset(preset)}
         >
           {preset.label}
@@ -319,7 +319,7 @@
 
     <!-- Start Button -->
     <button
-      class="w-full max-w-xs px-12 py-3 bg-violet-600 hover:bg-violet-700 rounded-full text-white text-lg font-medium transition-colors duration-200 mb-4"
+      class="w-full max-w-xs px-6 py-2 bg-violet-600 hover:bg-violet-700 rounded-full text-white text-lg font-medium transition-colors duration-200 mb-4 flex items-center justify-center"
       onclick={start}
     >
       Start
