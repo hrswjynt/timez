@@ -106,19 +106,22 @@
     const previousLapTime = laps.length > 0 ? laps[0].time : 0;
     const diff = lapTime - previousLapTime;
 
-    // Determine color based on lap performance
-    let color = 'white';
-    if (laps.length >= 1) {
-      const avgDiff = laps.reduce((sum, l) => sum + l.diff, 0) / laps.length;
-      if (diff < avgDiff * 0.95) color = 'blue';
-      else if (diff > avgDiff * 1.05) color = 'red';
+    const newLap = { id: Date.now(), time: lapTime, diff, color: 'white' };
+    let newLaps = [newLap, ...laps];
+
+    // Recalculate colors for ALL laps (Fastest/Slowest)
+    if (newLaps.length >= 2) {
+      const diffs = newLaps.map(l => l.diff);
+      const minDiff = Math.min(...diffs);
+      const maxDiff = Math.max(...diffs);
+
+      newLaps = newLaps.map(l => ({
+        ...l,
+        color: l.diff === minDiff ? 'violet' : l.diff === maxDiff ? 'red' : 'white'
+      }));
     }
 
-    laps = [
-      { id: Date.now(), time: lapTime, diff, color },
-      ...laps
-    ];
-
+    laps = newLaps;
     await saveStopwatchState();
   }
 
@@ -197,7 +200,7 @@
           {#each laps as lap, i}
             <div
               class="grid grid-cols-3 gap-4 px-2 py-2 border-b border-zinc-800/50
-                     {lap.color === 'red' ? 'text-red-400' : lap.color === 'blue' ? 'text-blue-400' : 'text-white'}"
+                     {lap.color === 'red' ? 'text-red-400' : lap.color === 'violet' ? 'text-violet-400' : 'text-white'}"
             >
               <span class="font-mono text-sm">{String(laps.length - i).padStart(2, '0')}</span>
               <span class="font-mono text-sm text-center">{formatLapTime(lap.diff)}</span>
