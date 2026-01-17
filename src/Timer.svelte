@@ -1,5 +1,6 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
+  import { fade, fly } from 'svelte/transition';
   import WheelPicker from './WheelPicker.svelte';
 
   let hours = $state(0);
@@ -226,8 +227,13 @@
   });
 </script>
 
-<div class="flex flex-col items-center justify-between h-full p-4 pt-6">
+<div class="h-full p-4 pt-6 grid grid-cols-1 grid-rows-1">
   {#if isRunning || remainingMs > 0 || isFinished}
+  <div 
+    class="flex flex-col items-center justify-between w-full h-full col-start-1 row-start-1 z-10"
+    in:fly={{ y: 20, duration: 400, delay: 200 }} 
+    out:fade={{ duration: 200 }}
+  >
     <!-- Running/Paused/Finished Timer Display -->
     <div class="flex-1 flex flex-col items-center justify-center">
       <div class="text-6xl font-light text-white tracking-wider font-mono">
@@ -261,7 +267,13 @@
         {/if}
       {/if}
     </div>
+  </div>
   {:else}
+  <div 
+    class="flex flex-col items-center justify-between w-full h-full col-start-1 row-start-1 z-10"
+    in:fly={{ y: 20, duration: 400, delay: 200 }} 
+    out:fade={{ duration: 200 }}
+  >
     <!-- Wheel Pickers -->
     <div class="flex gap-1 justify-center flex-1 items-center">
       <WheelPicker bind:value={hours} min={0} max={23} label="Hours" />
@@ -288,5 +300,6 @@
     >
       Start
     </button>
+  </div>
   {/if}
 </div>
