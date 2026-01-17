@@ -8,6 +8,7 @@
   import Navigation from './Navigation.svelte';
 
   let activeTab = $state('timer');
+  let isAppMounted = $state(false);
 
   // Load saved tab and listen for messages from background script
   onMount(() => {
@@ -25,7 +26,17 @@
         }
       });
     }
+
+    // Enable animations only AFTER initial render
+    setTimeout(() => {
+      isAppMounted = true;
+    }, 50);
   });
+
+  function tabFly(node, params) {
+    if (!isAppMounted) return { duration: 0 };
+    return fly(node, params);
+  }
 
   // Save tab whenever it changes
   $effect(() => {
@@ -40,7 +51,7 @@
     {#key activeTab}
       <div 
         class="col-start-1 row-start-1 w-full h-full"
-        in:fly={{ x: 20, duration: 300, delay: 150 }}
+        in:tabFly={{ x: 20, duration: 300, delay: 150 }}
         out:fade={{ duration: 150 }}
       >
         {#if activeTab === 'timer'}
