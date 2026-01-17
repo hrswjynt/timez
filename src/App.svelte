@@ -1,5 +1,6 @@
 <script>
   import { onMount } from 'svelte';
+  import { fly, fade } from 'svelte/transition';
   import Timer from './Timer.svelte';
   import Stopwatch from './Stopwatch.svelte';
   import Alarm from './Alarm.svelte';
@@ -35,16 +36,24 @@
 </script>
 
 <div class="flex flex-col h-[500px] bg-black">
-  <main class="flex-1 overflow-hidden">
-    {#if activeTab === 'timer'}
-      <Timer />
-    {:else if activeTab === 'stopwatch'}
-      <Stopwatch />
-    {:else if activeTab === 'alarm'}
-      <Alarm />
-    {:else if activeTab === 'worldclock'}
-      <WorldClock />
-    {/if}
+  <main class="flex-1 overflow-hidden grid grid-cols-1 grid-rows-1 relative">
+    {#key activeTab}
+      <div 
+        class="col-start-1 row-start-1 w-full h-full"
+        in:fly={{ x: 20, duration: 300, delay: 150 }}
+        out:fade={{ duration: 150 }}
+      >
+        {#if activeTab === 'timer'}
+          <Timer />
+        {:else if activeTab === 'stopwatch'}
+          <Stopwatch />
+        {:else if activeTab === 'alarm'}
+          <Alarm />
+        {:else if activeTab === 'worldclock'}
+          <WorldClock />
+        {/if}
+      </div>
+    {/key}
   </main>
 
   <Navigation bind:activeTab />
