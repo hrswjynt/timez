@@ -32,9 +32,7 @@
       "id": "timez@extension.local",
       "strict_min_version": "115.0",
       "data_collection_permissions": {
-        "required": ["none"],
-        "optional": ["none"],
-        "collect": false
+        "required": ["none"]
       }
     }
   }
