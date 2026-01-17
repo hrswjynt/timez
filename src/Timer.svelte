@@ -38,7 +38,12 @@
     try {
       const result = await browser.storage.local.get('timerState');
       if (result.timerState) {
-        const { endTime: savedEndTime, remainingMs: savedRemainingMs, isRunning: wasRunning } = result.timerState;
+        const { endTime: savedEndTime, remainingMs: savedRemainingMs, isRunning: wasRunning, hours: h, minutes: m, seconds: s } = result.timerState;
+        
+        // Restore input values
+        if (h !== undefined) hours = h;
+        if (m !== undefined) minutes = m;
+        if (s !== undefined) seconds = s;
 
         if (wasRunning && savedEndTime) {
           const now = Date.now();
@@ -53,8 +58,8 @@
             // Timer finished while popup was closed
             isFinished = true;
             remainingMs = 0;
-            // Clear storage so we don't reload this next time if they don't reset
-            await clearTimerState(); 
+            // Save state instead of clearing to preserve inputs
+            await saveTimerState(); 
           }
         } else if (!wasRunning && savedRemainingMs > 0) {
           // Paused state - restore remaining time
@@ -74,7 +79,10 @@
         timerState: {
           endTime: endTime,
           remainingMs: remainingMs,
-          isRunning: isRunning
+          isRunning: isRunning,
+          hours: hours,
+          minutes: minutes,
+          seconds: seconds
         }
       });
     } catch (e) {
@@ -178,10 +186,9 @@
     remainingMs = 0;
     endTime = 0;
     isFinished = false;
-    hours = 0;
-    minutes = 0;
-    seconds = 0;
-    await clearTimerState();
+    // Don't reset inputs to 0, keep them for reuse
+    // Save the "idle" state with inputs preserved
+    await saveTimerState();
   }
 
   function playSound() {
