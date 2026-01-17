@@ -8,13 +8,14 @@
     "build": "vite build && npm run copy:extension && npm run zip",
     "build:extension": "vite build && npm run copy:extension",
     "copy:extension": "node scripts/copy-extension.js",
-    "zip": "powershell -Command \"Remove-Item -Path timez-extension.zip -ErrorAction SilentlyContinue; Compress-Archive -Path dist/* -DestinationPath timez-extension.zip\"",
+    "zip": "cd dist && bestzip ../timez-extension.zip *",
     "preview": "vite preview"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^6.2.1",
     "@tailwindcss/postcss": "^4.1.18",
     "autoprefixer": "^10.4.23",
+    "bestzip": "^2.2.1",
     "postcss": "^8.5.6",
     "svelte": "^5.43.8",
     "tailwindcss": "^4.1.18",
