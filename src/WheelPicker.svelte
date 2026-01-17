@@ -9,17 +9,24 @@
   const ITEM_HEIGHT = 48;
 
   // Generate array of values
-  const items = $derived(
+  // Generate array of values
+  const originalItems = $derived(
     Array.from({ length: max - min + 1 }, (_, i) => min + i)
   );
+
+  // Triple items for infinite scroll
+  const items = $derived([...originalItems, ...originalItems, ...originalItems]);
 
   // Scroll to a specific value
   function scrollToValue(newValue, smooth = true) {
     if (!containerRef) return;
 
-    const targetIndex = items.indexOf(newValue);
-    if (targetIndex === -1) return;
-
+    const baseIndex = originalItems.indexOf(newValue);
+    if (baseIndex === -1) return;
+    
+    const singleSetLength = originalItems.length;
+    // Target the middle set
+    const targetIndex = baseIndex + singleSetLength; 
     const targetScroll = targetIndex * ITEM_HEIGHT;
 
     if (smooth) {
@@ -37,36 +44,30 @@
     }
   }
 
-  // Handle wheel events for precise control (1 step at a time)
-  function handleWheel(e) {
-    e.preventDefault();
+
+
+  // Handle scroll to update value
+  // Handle scroll to update value
+  function handleScroll() {
+    if (!containerRef) return;
+
+    const singleSetHeight = originalItems.length * ITEM_HEIGHT;
+    
+    // Loop logic: jump silently if near edges
+    if (containerRef.scrollTop < 10) {
+      containerRef.scrollTop += singleSetHeight;
+    } else if (containerRef.scrollTop > singleSetHeight * 2 + ITEM_HEIGHT) {
+      containerRef.scrollTop -= singleSetHeight;
+    }
 
     if (isAnimating) return;
 
-    // Determine direction based on scroll delta
-    const direction = e.deltaY > 0 ? 1 : -1;
-
-    // Calculate new value
-    const currentIndex = items.indexOf(value);
-    const newIndex = Math.max(0, Math.min(items.length - 1, currentIndex + direction));
-    const newValue = items[newIndex];
-
-    if (newValue !== value) {
-      value = newValue;
-      scrollToValue(newValue);
-    }
-  }
-
-  // Handle scroll to update value
-  function handleScroll() {
-    if (!containerRef || isAnimating) return;
-
     const scrollTop = containerRef.scrollTop;
     const index = Math.round(scrollTop / ITEM_HEIGHT);
-    const newIndex = Math.max(0, Math.min(items.length - 1, index));
-    const newValue = items[newIndex];
+    const normalizedIndex = index % originalItems.length;
+    const newValue = originalItems[normalizedIndex];
 
-    if (newValue !== value) {
+    if (newValue !== undefined && newValue !== value) {
       value = newValue;
     }
   }
@@ -82,23 +83,25 @@
   // Initialize scroll position on mount
   onMount(() => {
     if (containerRef) {
-      const targetIndex = items.indexOf(value);
-      if (targetIndex !== -1) {
-        containerRef.scrollTop = targetIndex * ITEM_HEIGHT;
-      }
+      // Force immediate jump to middle set without animation
+      scrollToValue(value, false);
     }
   });
 
   // Sync scroll position when value changes externally (e.g., from presets)
+  // Sync scroll position when value changes externally (e.g., from presets)
   $effect(() => {
     if (containerRef && !isAnimating) {
-      const targetIndex = items.indexOf(value);
-      if (targetIndex !== -1) {
-        const expectedScroll = targetIndex * ITEM_HEIGHT;
-        // Only scroll if significantly different
-        if (Math.abs(containerRef.scrollTop - expectedScroll) > ITEM_HEIGHT / 2) {
-          scrollToValue(value, false);
-        }
+      // We check if the current scroll position roughly matches ANY of the instances of the value
+      // If none match, we re-center to the middle instance
+      
+      const currentScroll = containerRef.scrollTop;
+      const index = Math.round(currentScroll / ITEM_HEIGHT);
+      const normalizedIndex = index % originalItems.length;
+      const currentValueAtScroll = originalItems[normalizedIndex];
+
+      if (currentValueAtScroll !== value) {
+        scrollToValue(value, true);
       }
     }
   });
@@ -120,7 +123,6 @@
       bind:this={containerRef}
       class="h-full overflow-y-scroll scrollbar-hide snap-y snap-mandatory scroll-smooth"
       onscroll={handleScroll}
-      onwheel={handleWheel}
     >
       <!-- Top padding for centering first item -->
       <div style="height: {ITEM_HEIGHT * 2}px"></div>

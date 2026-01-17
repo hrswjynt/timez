@@ -11,6 +11,7 @@
   let remainingMs = $state(0);
   let endTime = $state(0); // Timestamp when timer should end
   let intervalId = null;
+  let saveTimeout = null;
 
   const presets = [
     { label: '00:10:00', hours: 0, minutes: 10, seconds: 0 },
@@ -30,6 +31,22 @@
   // Load timer state on mount
   onMount(async () => {
     await loadTimerState();
+  });
+
+  // Auto-save inputs when they change
+  $effect(() => {
+    // Track dependencies
+    const h = hours;
+    const m = minutes;
+    const s = seconds;
+
+    // Only save if we are in setup mode (not running, not finished)
+    if (!isRunning && !isFinished) {
+      if (saveTimeout) clearTimeout(saveTimeout);
+      saveTimeout = setTimeout(() => {
+        saveTimerState();
+      }, 500);
+    }
   });
 
   async function loadTimerState() {
